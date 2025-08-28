@@ -10,39 +10,79 @@
   les fournisseurs (providers) et le routeur pour rendre l'application.
 */
 
-import React, { StrictMode, useState, useMemo, createContext } from "react";
+import React, {
+  StrictMode,
+  useState,
+  useMemo,
+  createContext,
+  useCallback,
+  useEffect,
+} from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
-import router from "./router";
+import { router } from "./router";
 import { LikesProvider } from "./context/LikesContext";
+import { AuthProvider } from "./context/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary"; // You'll need to create this
 
-// --- Création du contexte de thème ---
+// --- Theme Context with persistence ---
 export const ThemeContext = createContext();
 
 const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("light");
+  // Initialize theme from localStorage or default to light
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme || "light";
+  });
 
-  const toggleTheme = () => {
+  // Persist theme changes to localStorage
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+    // Apply theme to document root for CSS variables
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  // Memoize the toggle function to prevent unnecessary re-renders
+  const toggleTheme = useCallback(() => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+  }, []);
 
-  // Valeur partagée via le contexte
-  const value = useMemo(() => ({ theme, toggleTheme }), [theme]);
+  // Memoize the context value
+  const value = useMemo(
+    () => ({
+      theme,
+      toggleTheme,
+      setTheme,
+    }),
+    [theme, toggleTheme]
+  );
 
   return (
     <ThemeContext.Provider value={value}>
-      <div className={theme === "dark" ? "dark" : ""}>{children}</div>
+      <div className={theme === "dark" ? "dark" : ""} data-theme={theme}>
+        {children}
+      </div>
     </ThemeContext.Provider>
+  );
+};
+
+const AppProviders = ({ children }) => {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <LikesProvider>{children}</LikesProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };
 
 // --- Point d'entrée React ---
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <LikesProvider>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </LikesProvider>
+    <AppProviders>
+      <RouterProvider router={router} />
+    </AppProviders>
   </StrictMode>
 );

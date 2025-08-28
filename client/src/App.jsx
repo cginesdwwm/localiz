@@ -6,28 +6,68 @@
   - Toaster affiche les notifications (ex: succès, erreurs) si la librairie est utilisée.
 */
 
-import { Outlet } from "react-router-dom"; // Emplacement des routes enfants
-import "./App.css"; // Styles locaux de l'application
-import Header from "./components/Header/Header"; // Le header (nav)
-import { Toaster } from "react-hot-toast"; // Notifications toast
-import { AuthProvider } from "./context/AuthContext";
+import { Outlet } from "react-router-dom";
+import "./App.css";
+import Header from "./components/Header/Header";
+import { Toaster } from "react-hot-toast";
+import { useAuth } from "./context/AuthContext"; // Custom hook for auth context
+import { useTheme } from "./context/ThemeContext"; // Custom hook for theme context
+import { useEffect } from "react";
 
 function App() {
+  const { loading } = useAuth();
+  // const { user, loading } = useAuth();
+  const { theme } = useTheme();
+
+  // Apply theme class to body for global styles
+  useEffect(() => {
+    document.body.className = theme === "dark" ? "dark-theme" : "light-theme";
+  }, [theme]);
+
+  // Show loading state while authentication is being checked
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
-    // Layout principal en flex-col (header en haut, contenu qui prend l'espace restant)
     <div className="h-screen flex flex-col">
-      <AuthProvider>
-        {/* Header visible sur toutes les pages */}
-        <Header />
+      {/* Header visible on all pages */}
+      <Header />
 
-        {/* Zone principale où s'affichent les pages selon la route */}
-        <main className="flex-1 flex items-center justify-center">
+      {/* Main content area with error boundary */}
+      <main className="flex-1 flex items-center justify-center overflow-auto">
+        <div className="w-full max-w-7xl mx-auto px-4">
           <Outlet />
-        </main>
-      </AuthProvider>
+        </div>
+      </main>
 
-      {/* Toaster global pour afficher des notifications (doit être présent une seule fois) */}
-      <Toaster />
+      {/* Toaster for notifications - now inside providers so it can access auth state */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: theme === "dark" ? "#1f2937" : "#ffffff",
+            color: theme === "dark" ? "#f9fafb" : "#1f2937",
+          },
+          success: {
+            iconTheme: {
+              primary: "#10b981",
+              secondary: "#ffffff",
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "#ffffff",
+            },
+          },
+        }}
+      />
     </div>
   );
 }

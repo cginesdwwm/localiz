@@ -10,6 +10,18 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 
+// Protected Route Component
+import ProtectedRoute from "./components/Auth/ProtectedRoute"; // You'll need to create this
+
+// Public Route Component (redirects to homepage if already logged in)
+import PublicRoute from "./components/Auth/PublicRoute"; // You'll need to create this
+
+// Route parameter validation helper
+const validateRouteId = (id) => {
+  // Basic validation - adjust regex as needed for your ID format
+  return /^[a-zA-Z0-9-_]{1,50}$/.test(id);
+};
+
 import Deals from "./pages/Deals/Deals";
 import DealExample from "./pages/Deals/DealExample";
 
@@ -53,22 +65,84 @@ export const router = createBrowserRouter([
       { path: "/homepage", element: <Homepage /> },
 
       // --- Auth / Forms ---
-      { path: "/register", element: <Register /> },
-      { path: "/login", element: <Login /> },
-      { path: "/forgot-password", element: <ForgotPassword /> },
-      { path: "/change-password", element: <ChangePassword /> },
+      {
+        path: "/register",
+        element: (
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "/login",
+        element: (
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "/forgot-password",
+        element: (
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "/change-password",
+        element: (
+          <ProtectedRoute>
+            <ChangePassword />
+          </ProtectedRoute>
+        ),
+      },
 
       // --- Deals ---
       { path: "/deals", element: <Deals /> },
-      { path: "/deals/:id", element: <DealExample /> }, // Exemple d'annonce unique
+      {
+        path: "/deals/:id",
+        element: <DealExample />,
+        loader: ({ params }) => {
+          if (!validateRouteId(params.id)) {
+            throw new Response("Annonce introuvable", { status: 400 });
+          }
+          return null;
+        },
+      },
 
       // --- Listings (Troc & Don) ---
       { path: "/listings", element: <SwapAndDonate /> },
-      { path: "/listings/:id", element: <ListingExample /> },
+      {
+        path: "/listings/:id",
+        element: <ListingExample />,
+        loader: ({ params }) => {
+          if (!validateRouteId(params.id)) {
+            throw new Response("Annonce introuvable", { status: 400 });
+          }
+          return null;
+        },
+      },
 
       // --- Profiles ---
-      { path: "/profile/me", element: <ProfileMe /> },
-      { path: "/profile/:userId", element: <ProfileOther /> },
+      {
+        path: "/profile/me",
+        element: (
+          <ProtectedRoute>
+            <ProfileMe />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/profile/:userId",
+        element: <ProfileOther />,
+        loader: ({ params }) => {
+          if (!validateRouteId(params.userId)) {
+            throw new Response("Utilisateur introuvable", { status: 400 });
+          }
+          return null;
+        },
+      },
 
       // --- Search ---
       { path: "/search", element: <Search /> },
@@ -77,8 +151,22 @@ export const router = createBrowserRouter([
       { path: "/search/swaps", element: <SearchSwaps /> },
 
       // --- Settings ---
-      { path: "/settings", element: <Settings /> },
-      { path: "/settings/manage-account", element: <ManageAccount /> },
+      {
+        path: "/settings",
+        element: (
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/settings/manage-account",
+        element: (
+          <ProtectedRoute>
+            <ManageAccount />
+          </ProtectedRoute>
+        ),
+      },
       { path: "/settings/theme", element: <Theme /> },
       { path: "/settings/cookies", element: <CookieSettings /> },
       { path: "/settings/language", element: <Language /> },
@@ -86,7 +174,14 @@ export const router = createBrowserRouter([
       // --- Other ---
       { path: "/about", element: <About /> },
       { path: "/legal", element: <LegalInfo /> },
-      { path: "/delete-account", element: <DeleteAccount /> },
+      {
+        path: "/delete-account",
+        element: (
+          <ProtectedRoute>
+            <DeleteAccount />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);
