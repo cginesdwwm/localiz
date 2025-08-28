@@ -2,9 +2,10 @@
  * middleware/auth.js
  * Middleware pour vérifier la présence et la validité d'un token JWT.
  */
-const jwt = require("jsonwebtoken");
 
-module.exports = function (req, res, next) {
+import jwt from "jsonwebtoken";
+
+export default function (req, res, next) {
   const header = req.headers.authorization;
   if (!header)
     return res
@@ -21,4 +22,4 @@ module.exports = function (req, res, next) {
   } catch (err) {
     return res.status(401).json({ message: "Token invalide ou expiré" });
   }
-};
+}

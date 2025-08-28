@@ -18,11 +18,14 @@
 //     </button>
 //   );
 // }
-// Ne pas oublier d'import le bouton
-//   {/* Bouton */}
-//         <Button
-//           id="btnEnSavoirPlus"
-//           color="primary"
-//           text="En savoir plus"
-//           className="absolute z-[3] left-1/2 top-[64%] -translate-x-1/2 -translate-y-1/2"
-//         />
+
+// // Ne pas oublier d'import le bouton
+// {
+//   /* Bouton */
+// }
+// <Button
+//   id="btnEnSavoirPlus"
+//   color="primary"
+//   text="En savoir plus"
+//   className="absolute z-[3] left-1/2 top-[64%] -translate-x-1/2 -translate-y-1/2"
+// />;
