@@ -1,0 +1,73 @@
+ROUTE, CONTROLLER, MODEL 
+
+Quand un utilisateur fait une action (par exemple cliquer sur "S’inscrire"), voici ce qu’il se passe :
+
+1. Route → Vérifie quelle URL est appelée (/register, /api/users, etc.) et appelle le bon controller.
+2. Controller → Reçoit la requête, applique la logique métier (ex: vérifier que les champs sont valides). Il peut demander des infos à un model.
+3. Model → Représente les données (souvent liées à une base de données). Il définit la structure (par ex. "Un utilisateur a un nom, un email et un mot de passe") et permet de lire/écrire en BDD.
+4. Controller (suite) → Reçoit la réponse du model et décide quoi renvoyer (ex: "Utilisateur créé avec succès !").
+5. Vue (React) → Affiche la réponse à l’utilisateur.
+
+
+LES 3 COUCHES :
+
+1. Routes
+C’est une sorte de plan de circulation.
+
+2. Controllers
+Ils gèrent la logique métier.
+Ils reçoivent les données de la requête, vérifient les règles, puis demandent au model d’agir.
+
+3. Models
+Ils définissent la forme des données.
+
+
+COMMENT ILS SONT LIES :
+
+Route : “Si quelqu’un appelle /register, je passe la main au controller registerUser.”
+Controller : “Ok, je traite la logique, j’appelle le model si besoin, puis je renvoie la réponse.”
+Model : “Je gère les données, je lis/écris dans la base, puis je rends les infos au controller.”
+
+Donc :
+Route → Controller → Model → Controller → Réponse à l’utilisateur
+
+👉 C’est comme un restaurant :
+Route = le serveur qui prend la commande.
+Controller = le chef qui décide comment préparer le plat.
+Model = le garde-manger (la base de données).
+Puis le plat est renvoyé au client (l’utilisateur).
+
+__________________________________________________________________________________
+
+(dans MAIN.JSX)
+
+👉 Dans cet ordre :
+ThemeProvider : pour appliquer le thème global.
+LikesProvider : pour partager le nombre de likes.
+RouterProvider : pour gérer la navigation.
+
+Pourquoi l’ordre est important :
+
+🌐 1. ThemeProvider
+C’est lui qui va gérer le contexte global du thème (ex. clair/sombre).
+On le met en tout premier, car tout le reste de l’application (y compris la navigation et les composants qui s’affichent selon les routes) doit pouvoir accéder à ce contexte.
+=> Si on le mettait plus bas, certaines parties n’y auraient pas accès.
+
+❤️ 2. LikesProvider
+Lui sert à partager les likes (par ex. compteur, favoris, etc.) entre toutes les pages.
+On le met après le ThemeProvider, car il dépend aussi du thème pour pouvoir, par exemple, changer son style ou afficher différemment les likes (icônes, couleurs).
+=> En gros : tout ce qui touche au contenu et aux données partagées va sous le thème.
+
+🚦 3. RouterProvider
+C’est lui qui gère quelle page s’affiche selon l’URL.
+Il doit être à l’intérieur des providers (theme, likes), parce que toutes les pages qui seront rendues par le router doivent avoir accès au thème et aux likes.
+=> Si on le mettait au-dessus, les routes n’auraient pas ces contextes, donc elles planteraient ou n’auraient pas les bonnes infos.
+
+⚖️ Analogie simple
+Imagine :
+ThemeProvider = l’électricité d’une maison ⚡
+LikesProvider = les meubles et objets dans chaque pièce 🪑
+RouterProvider = les portes qui mènent vers chaque pièce 🚪
+Si tu mets les portes (RouterProvider) avant d’avoir l’électricité, tes pièces seront dans le noir.
+Si tu mets les meubles (LikesProvider) avant d’avoir l’électricité, tu ne verras pas les meubles non plus.
+=> Donc, il faut : électricité → meubles → portes qui ouvrent sur les pièces équipées.
