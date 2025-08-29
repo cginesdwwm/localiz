@@ -11,8 +11,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 /**
- * REGISTER
- * Création d'un nouvel utilisateur
+ * Inscription
  */
 export const register = async (req, res) => {
   try {
@@ -29,12 +28,12 @@ export const register = async (req, res) => {
       password,
     } = req.body;
 
-    // Vérif champs requis
+    // Vérifier champs obligatoires
     if (!firstName || !lastName || !username || !email || !password) {
       return res.status(400).json({ message: "Champs requis manquants" });
     }
 
-    // Vérif doublons
+    // Vérifier si email/username/phone existent déjà
     const emailExists = await User.findOne({ email });
     if (emailExists)
       return res.status(400).json({ message: "Email déjà utilisé" });
@@ -48,19 +47,18 @@ export const register = async (req, res) => {
     if (phone) {
       const phoneExists = await User.findOne({ phone });
       if (phoneExists)
-        return res
-          .status(400)
-          .json({ message: "Numéro de téléphone déjà utilisé" });
+        return res.status(400).json({ message: "Téléphone déjà utilisé" });
     }
 
     // Hash mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Photo si envoyée via multer
-    const profilePhotoPath = req.file
-      ? `/uploads/${req.file.filename}`
-      : undefined;
+    // // Photo si envoyée via multer
+    // const profilePhotoPath = req.file
+    //   ? `/uploads/${req.file.filename}`
+    //   : undefined;
 
+    // Création nouvel utilisateur
     const newUser = new User({
       firstName,
       lastName,
@@ -70,14 +68,13 @@ export const register = async (req, res) => {
       postalCode,
       birthday: birthday ? new Date(birthday) : undefined,
       gender,
-      profilePhoto: profilePhotoPath,
-      agreeToTerms: !!(agreeToTerms === "true" || agreeToTerms === true),
+      agreeToTerms: !!agreeToTerms,
       password: hashedPassword,
     });
 
     await newUser.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Utilisateur créé avec succès",
       user: {
         id: newUser._id,
@@ -85,7 +82,10 @@ export const register = async (req, res) => {
         lastName: newUser.lastName,
         username: newUser.username,
         email: newUser.email,
-        profilePhoto: newUser.profilePhoto,
+        phone: newUser.phone,
+        postalCode: newUser.postalCode,
+        birthday: newUser.birthday,
+        gender: newUser.gender,
       },
     });
   } catch (error) {
@@ -95,22 +95,18 @@ export const register = async (req, res) => {
 };
 
 /**
- * LOGIN
- * Connexion utilisateur avec email ou username
+ * Connexion
  */
 export const login = async (req, res) => {
   try {
     const { data, email, username, password } = req.body;
 
-    // On peut envoyer soit `data`, soit directement email ou username
     const identifier = data || email || username;
-    if (!identifier || !password) {
-      return res.status(400).json({ message: "Identifiants manquants" });
-    }
+    if (!identifier || !password)
+      return res.status(400).json({ message: "Données manquantes" });
 
-    // Vérifie si c'est un email
+    // Détection email ou username
     const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
-
     let user;
     if (emailRegex.test(identifier)) {
       user = await User.findOne({ email: identifier });
@@ -118,15 +114,12 @@ export const login = async (req, res) => {
       user = await User.findOne({ username: identifier });
     }
 
-    if (!user) {
+    if (!user)
       return res.status(400).json({ message: "Identifiants invalides" });
-    }
 
-    // Vérif mot de passe
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: "Mot de passe incorrect" });
-    }
+    // Vérification mot de passe
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(400).json({ message: "Identifiants invalides" });
 
     // Génération JWT
     const token = jwt.sign(
@@ -135,19 +128,21 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // Renvoie un user "public"
+    // On ne renvoie pas le mot de passe.
+    // publicUser est une version "nettoyée" de l’utilisateur, sans mot de passe ni infos sensibles, spécialement faite pour être envoyée côté client.
     const publicUser = {
       id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       username: user.username,
       email: user.email,
-      profilePhoto: user.profilePhoto,
+      phone: user.phone,
+      postalCode: user.postalCode,
+      birthday: user.birthday,
+      gender: user.gender,
     };
 
-    res
-      .status(200)
-      .json({ token, user: publicUser, message: "Connexion réussie" });
+    return res.json({ token, user: publicUser, message: "Connexion réussie" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });

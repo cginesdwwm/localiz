@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
     postalCode: { type: String, required: true },
     birthday: { type: Date, required: true },
     gender: { type: String, required: true },
-    profilePhoto: { type: String, required: true },
+    // profilePhoto: { type: String, required: true },
     agreeToTerms: { type: Boolean, required: true, default: false },
     password: { type: String, required: true },
   },
