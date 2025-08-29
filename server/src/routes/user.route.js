@@ -12,7 +12,7 @@ import { login, register } from "../controllers/user.controller.js";
 const router = express.Router();
 
 // Inscription
-router.post("/", register);
+router.post("/register", register);
 
 // Connexion
 router.post("/login", login);

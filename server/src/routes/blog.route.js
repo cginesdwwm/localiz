@@ -1,10 +1,10 @@
-import express from "express";
-import { getBlogs } from "../controllers/blog.controller.js";
+// import express from "express";
+// import { getBlogs } from "../controllers/blog.controller.js";
 
-const router = express.Router();
+// const router = express.Router();
 
-router.get("/", getBlogs);
+// router.get("/", getBlogs);
 
-export default router;
+// export default router;
 
-// http://localhost:5000/blog
+// // http://localhost:5000/blog

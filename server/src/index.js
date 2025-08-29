@@ -58,28 +58,28 @@ app.use(
 );
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: NODE_ENV === "production" ? 100 : 1000, // Limit each IP
-  message: {
-    error: "Trop de requêtes, veuillez réessayer plus tard.",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: NODE_ENV === "production" ? 100 : 1000, // Limit each IP
+//   message: {
+//     error: "Trop de requêtes, veuillez réessayer plus tard.",
+//   },
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
 
-app.use(limiter);
+// app.use(limiter);
 
-// Specific rate limit for auth endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Only 5 login attempts per 15 minutes
-  message: {
-    error:
-      "Trop de tentatives d'authentification, veuillez réessayer plus tard.",
-  },
-  skipSuccessfulRequests: true,
-});
+// // Specific rate limit for auth endpoints
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 5, // Only 5 login attempts per 15 minutes
+//   message: {
+//     error:
+//       "Trop de tentatives d'authentification, veuillez réessayer plus tard.",
+//   },
+//   skipSuccessfulRequests: true,
+// });
 
 // middlewares globaux
 app.use(cookieParser());
@@ -112,7 +112,7 @@ const handleValidationErrors = (req, res, next) => {
 // --- Routes with middleware ---
 
 // Apply auth rate limiting to authentication routes
-app.use("/auth", authLimiter);
+// app.use("/auth", authLimiter);
 
 // ID parameter validation for routes with IDs
 const validateId = [
@@ -135,7 +135,7 @@ app.use("/listings/:id", validateId);
 app.use("/profile/:userId", validateUserId);
 
 // Mount all routes
-app.use("/", routes);
+app.use("/api", routes);
 
 // --- Error Handling ---
 
@@ -148,26 +148,26 @@ app.use("*", (req, res) => {
 });
 
 // Global error handler
-app.use((error, req, res, next) => {
-  console.error("Erreur serveur:", error);
+// app.use((error, req, res, next) => {
+//   console.error("Erreur serveur:", error);
 
-  // CORS error
-  if (error.message === "Not allowed by CORS") {
-    return res.status(403).json({
-      error: "CORS: Origine non autorisée",
-    });
-  }
+//   // CORS error
+//   if (error.message === "Not allowed by CORS") {
+//     return res.status(403).json({
+//       error: "CORS: Origine non autorisée",
+//     });
+//   }
 
-  // Default error
-  const statusCode = error.statusCode || 500;
-  const message =
-    NODE_ENV === "production" ? "Erreur interne du serveur" : error.message;
+//   // Default error
+//   const statusCode = error.statusCode || 500;
+//   const message =
+//     NODE_ENV === "production" ? "Erreur interne du serveur" : error.message;
 
-  res.status(statusCode).json({
-    error: message,
-    ...(NODE_ENV === "development" && { stack: error.stack }),
-  });
-});
+//   res.status(statusCode).json({
+//     error: message,
+//     ...(NODE_ENV === "development" && { stack: error.stack }),
+//   });
+// });
 
 // démarre le serveur et connecte la base de données
 app.listen(PORT, () => {

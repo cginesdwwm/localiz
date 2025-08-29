@@ -1,3 +1,9 @@
+A VOIR :
+App.jsx 
+index.js du server
+
+__________________________________________________________________________________
+
 ROUTE, CONTROLLER, MODEL 
 
 Quand un utilisateur fait une action (par exemple cliquer sur "S’inscrire"), voici ce qu’il se passe :

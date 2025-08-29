@@ -6,17 +6,19 @@
   - Toaster affiche les notifications (ex: succès, erreurs) si la librairie est utilisée.
 */
 
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import "./App.css";
+import { useAuth } from "./context/AuthContext";
+import { useTheme } from "./context/ThemeContext";
+import { AuthProvider } from "./context/AuthContext";
+// import { BlogProvider } from "./context/BlogProvider";
+import { ThemeProvider } from "./context/ThemeContext";
 import Header from "./components/Header/Header";
 import { Toaster } from "react-hot-toast";
-import { useAuth } from "./context/AuthContext"; // Custom hook for auth context
-import { useTheme } from "./context/ThemeContext"; // Custom hook for theme context
-import { useEffect } from "react";
 
-function App() {
+// Inner App component that uses the context hooks
+function AppContent() {
   const { loading } = useAuth();
-  // const { user, loading } = useAuth();
   const { theme } = useTheme();
 
   // Apply theme class to body for global styles
@@ -69,6 +71,19 @@ function App() {
         }}
       />
     </div>
+  );
+}
+
+// Main App component with all providers
+function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <BlogProvider>
+          <AppContent />
+        </BlogProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
