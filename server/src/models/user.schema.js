@@ -1,5 +1,4 @@
 /**
- * models/User.js
  * Schéma Mongoose pour les utilisateurs.
  * Contient les informations collectées à l'inscription.
  */

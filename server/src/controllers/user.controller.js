@@ -48,7 +48,9 @@ export const register = async (req, res) => {
     if (phone) {
       const phoneExists = await User.findOne({ phone });
       if (phoneExists)
-        return res.status(400).json({ message: "Téléphone déjà utilisé" });
+        return res
+          .status(400)
+          .json({ message: "Numéro de téléphone déjà utilisé" });
     }
 
     // Hash mot de passe

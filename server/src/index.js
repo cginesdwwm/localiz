@@ -57,30 +57,6 @@ app.use(
   })
 );
 
-// Rate limiting
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: NODE_ENV === "production" ? 100 : 1000, // Limit each IP
-//   message: {
-//     error: "Trop de requêtes, veuillez réessayer plus tard.",
-//   },
-//   standardHeaders: true,
-//   legacyHeaders: false,
-// });
-
-// app.use(limiter);
-
-// // Specific rate limit for auth endpoints
-// const authLimiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 5, // Only 5 login attempts per 15 minutes
-//   message: {
-//     error:
-//       "Trop de tentatives d'authentification, veuillez réessayer plus tard.",
-//   },
-//   skipSuccessfulRequests: true,
-// });
-
 // middlewares globaux
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
@@ -97,43 +73,6 @@ app.use(
   })
 );
 
-// --- Request Validation Middleware ---
-const handleValidationErrors = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      error: "Echec de la validation",
-      details: errors.array(),
-    });
-  }
-  next();
-};
-
-// --- Routes with middleware ---
-
-// Apply auth rate limiting to authentication routes
-// app.use("/auth", authLimiter);
-
-// ID parameter validation for routes with IDs
-const validateId = [
-  param("id")
-    .matches(/^[a-zA-Z0-9-_]{1,50}$/)
-    .withMessage("Format d'ID invalide"),
-  handleValidationErrors,
-];
-
-const validateUserId = [
-  param("userId")
-    .matches(/^[a-zA-Z0-9-_]{1,50}$/)
-    .withMessage("Format d'ID utilisateur invalide"),
-  handleValidationErrors,
-];
-
-// Apply validation to specific route patterns
-app.use("/deals/:id", validateId);
-app.use("/listings/:id", validateId);
-app.use("/profile/:userId", validateUserId);
-
 // Mount all routes
 app.use("/api", routes);
 
@@ -147,63 +86,8 @@ app.use("*", (req, res) => {
   });
 });
 
-// Global error handler
-// app.use((error, req, res, next) => {
-//   console.error("Erreur serveur:", error);
-
-//   // CORS error
-//   if (error.message === "Not allowed by CORS") {
-//     return res.status(403).json({
-//       error: "CORS: Origine non autorisée",
-//     });
-//   }
-
-//   // Default error
-//   const statusCode = error.statusCode || 500;
-//   const message =
-//     NODE_ENV === "production" ? "Erreur interne du serveur" : error.message;
-
-//   res.status(statusCode).json({
-//     error: message,
-//     ...(NODE_ENV === "development" && { stack: error.stack }),
-//   });
-// });
-
 // démarre le serveur et connecte la base de données
 app.listen(PORT, () => {
   console.log(`Le serveur fonctionne sur le port ${PORT}`);
   connectDB();
 });
-
-// --- Server Startup ---
-// const startServer = async () => {
-//   try {
-//     // Connect to database first
-//     await connectDB();
-//     console.log("Database connected successfully");
-
-//     // Start server
-//     app.listen(PORT, () => {
-//       console.log(`🚀 Server running on port ${PORT}`);
-//       console.log(`📦 Environment: ${NODE_ENV}`);
-//       console.log(`🌐 CORS origins: ${getAllowedOrigins().join(", ")}`);
-//     });
-//   } catch (error) {
-//     console.error("Failed to start server:", error);
-//     process.exit(1);
-//   }
-// };
-
-// // Handle unhandled rejections
-// process.on("unhandledRejection", (err) => {
-//   console.error("Unhandled Rejection:", err);
-//   process.exit(1);
-// });
-
-// // Handle uncaught exceptions
-// process.on("uncaughtException", (err) => {
-//   console.error("Uncaught Exception:", err);
-//   process.exit(1);
-// });
-
-// startServer();
