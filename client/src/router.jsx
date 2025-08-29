@@ -49,11 +49,11 @@ import SearchDeals from "./pages/Search/SearchDeals";
 import SearchDonations from "./pages/Search/SearchDonations";
 import SearchSwaps from "./pages/Search/SearchSwaps";
 
-import CookieSettings from "./pages/Settings/CookieSettings";
-import Language from "./pages/Settings/Language";
-import ManageAccount from "./pages/Settings/ManageAccount";
-import Settings from "./pages/Settings/Settings";
-import Theme from "./pages/Settings/Theme";
+import CookieSettings from "./pages/SettingsPages/CookieSettings";
+import Language from "./pages/SettingsPages/Language";
+import ManageAccount from "./pages/SettingsPages/ManageAccount";
+import Settings from "./pages/SettingsPages/Settings";
+import Theme from "./pages/SettingsPages/Theme";
 
 export const router = createBrowserRouter([
   {

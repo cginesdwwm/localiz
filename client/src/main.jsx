@@ -10,79 +10,20 @@
   les fournisseurs (providers) et le routeur pour rendre l'application.
 */
 
-import React, {
-  StrictMode,
-  useState,
-  useMemo,
-  createContext,
-  useCallback,
-  useEffect,
-} from "react";
-import { createRoot } from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
-import { LikesProvider } from "./context/LikesContext";
-import { AuthProvider } from "./context/AuthContext";
-import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary"; // You'll need to create this
+import { StrictMode } from "react"; // Utilisé pour activer des contrôles en dev
+import { createRoot } from "react-dom/client"; // API d'attachement pour React 18+
+import "./index.css"; // Styles globaux de l'application
+import { RouterProvider } from "react-router-dom"; // Fournit le router créé dans router.jsx
+import { router } from "./router"; // Définition des routes de l'app
+import { LikesProvider } from "./context/LikesContext"; // Contexte pour partager les likes
 
-// --- Theme Context with persistence ---
-export const ThemeContext = createContext();
-
-const ThemeProvider = ({ children }) => {
-  // Initialize theme from localStorage or default to light
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme || "light";
-  });
-
-  // Persist theme changes to localStorage
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
-    // Apply theme to document root for CSS variables
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
-
-  // Memoize the toggle function to prevent unnecessary re-renders
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  }, []);
-
-  // Memoize the context value
-  const value = useMemo(
-    () => ({
-      theme,
-      toggleTheme,
-      setTheme,
-    }),
-    [theme, toggleTheme]
-  );
-
-  return (
-    <ThemeContext.Provider value={value}>
-      <div className={theme === "dark" ? "dark" : ""} data-theme={theme}>
-        {children}
-      </div>
-    </ThemeContext.Provider>
-  );
-};
-
-const AppProviders = ({ children }) => {
-  return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <AuthProvider>
-          <LikesProvider>{children}</LikesProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
-};
-
-// --- Point d'entrée React ---
+// createRoot attache l'application à l'élément DOM avec l'id 'root'
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AppProviders>
-      <RouterProvider router={router} />
-    </AppProviders>
+    {/* LikesProvider enveloppe l'app pour partager le nombre de likes */}
+    <LikesProvider>
+      {/* RouterProvider affiche les composants selon l'URL */}
+      <RouterProvider router={router}></RouterProvider>
+    </LikesProvider>
   </StrictMode>
 );
